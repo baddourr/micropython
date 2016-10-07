@@ -30,7 +30,9 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 }
 
 static char *stack_top;
-static char heap[2048];
+//increase heap size to try loading big modules
+//static char heap[2048];
+static char heap[12048];
 
 int main(int argc, char **argv) {
     int stack_dummy;
@@ -40,6 +42,11 @@ int main(int argc, char **argv) {
     gc_init(heap, heap + sizeof(heap));
     #endif
     mp_init();
+    
+// Load frozen mpy modules
+    #if MICROPY_MODULE_FROZEN
+        pyexec_frozen_module("mod3.py");
+    #endif
     #if MICROPY_REPL_EVENT_DRIVEN
     pyexec_event_repl_init();
     for (;;) {

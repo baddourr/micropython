@@ -196,6 +196,7 @@ PY_O_BASENAME = \
 	repl.o \
 	smallint.o \
 	frozenmod.o \
+	../minimal/frozen.o \
 	../extmod/moductypes.o \
 	../extmod/modujson.o \
 	../extmod/modure.o \

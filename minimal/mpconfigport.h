@@ -45,7 +45,8 @@
 #define MICROPY_PY_IO               (0)
 #define MICROPY_PY_STRUCT           (0)
 #define MICROPY_PY_SYS              (0)
-#define MICROPY_MODULE_FROZEN_MPY   (1)
+#define MICROPY_MODULE_FROZEN_MPY   (1)	//RGBToDo	enabled
+#define MICROPY_MODULE_FROZEN_STR   (1)	//RGBToDo	added and enabled
 #define MICROPY_CPYTHON_COMPAT      (0)
 #define MICROPY_LONGINT_IMPL        (MICROPY_LONGINT_IMPL_NONE)
 #define MICROPY_FLOAT_IMPL          (MICROPY_FLOAT_IMPL_NONE)
