@@ -320,7 +320,7 @@ raw_repl_reset:
             if (c == CHAR_CTRL_A) {
                 // reset raw REPL
                 goto raw_repl_reset;
-            } else if (c == CHAR_CTRL_B) {
+            } else if (c == CHAR_CTRL_D) {//RGBToDo: swapped CHAR_CTRL_D and CHAR_CTRL_B to check with the terminal
                 // change to friendly REPL
                 mp_hal_stdout_tx_str("\r\n");
                 vstr_clear(&line);
@@ -329,9 +329,11 @@ raw_repl_reset:
             } else if (c == CHAR_CTRL_C) {
                 // clear line
                 vstr_reset(&line);
-            } else if (c == CHAR_CTRL_D) {
+            } else if (c == CHAR_CTRL_B) {   
                 // input finished
                 break;
+            } else if (c == '\n') {   
+                // neglect
             } else {
                 // let through any other raw 8-bit value
                 vstr_add_byte(&line, c);
@@ -418,7 +420,7 @@ friendly_repl_reset:
             vstr_clear(&line);
             pyexec_mode_kind = PYEXEC_MODE_RAW_REPL;
             return 0;
-        } else if (ret == CHAR_CTRL_B) {
+        } else if (ret == CHAR_CTRL_D) {//RGBToDo: swapped CTRL_D with CTRL_B because x-term does not capture CTRL_D, just for debugging reasons
             // reset friendly REPL
             mp_hal_stdout_tx_str("\r\n");
             goto friendly_repl_reset;
@@ -426,7 +428,7 @@ friendly_repl_reset:
             // break
             mp_hal_stdout_tx_str("\r\n");
             continue;
-        } else if (ret == CHAR_CTRL_D) {
+        } else if (ret == CHAR_CTRL_B) {
             // exit for a soft reset
             mp_hal_stdout_tx_str("\r\n");
             vstr_clear(&line);
@@ -506,10 +508,10 @@ int pyexec_frozen_module(const char *name) {
 
     switch (frozen_type) {
         #if MICROPY_MODULE_FROZEN_STR
-        case MP_FROZEN_STR:
+        case MP_FROZEN_STR:       
+ 
             return parse_compile_execute(frozen_data, MP_PARSE_FILE_INPUT, 0);
         #endif
-
         #if MICROPY_MODULE_FROZEN_MPY
         case MP_FROZEN_MPY:
             return parse_compile_execute(frozen_data, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_RAW_CODE);
