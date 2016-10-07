@@ -1,7 +1,8 @@
 include ../py/mkenv.mk
 
 CROSS = 0
-
+DEBUG = 1
+FROZENFILES = mod3.mpy
 # qstr definitions (must come before including py.mk)
 QSTR_DEFS = qstrdefsport.h
 
@@ -28,11 +29,11 @@ CFLAGS = -m32 $(INC) -Wall -Werror -ansi -std=gnu99 $(COPT)
 endif
 
 #Debugging/Optimization
-ifeq ($(DEBUG), 1)
-CFLAGS += -O0 -ggdb
-else
-CFLAGS += -Os -DNDEBUG
-endif
+#ifeq ($(DEBUG), 1)
+#CFLAGS += -O0 -ggdb -pg
+#else
+#CFLAGS += -Os -DNDEBUG
+#endif
 
 ifeq ($(CROSS), 1)
 LDFLAGS = -nostdlib -T stm32f405.ld -Map=$@.map --cref
@@ -54,13 +55,29 @@ SRC_C = \
 
 OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 
+all debug profile: functions
+
+all: CFLAGS += -Os -DNDEBUG
+all:
+	$(ECHO) "Build for proofing"
+
+profile: CFLAGS += -O0 -pg
+profile: 
+	$(ECHO) "Build for profiling"
+	
+debug: CFLAGS += -O0 -ggdb
+debug: 
+	$(ECHO) "Build for debuging"
+
+
 ifeq ($(CROSS), 1)
-all: $(BUILD)/firmware.dfu
+functions: $(BUILD)/firmware.dfu
 else
-all: $(BUILD)/firmware.elf
+functions: $(BUILD)/firmware.elf
 endif
 
-$(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
+#$(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
+$(BUILD)/_frozen_mpy.c: $(FROZENFILES) $(BUILD)/genhdr/qstrdefs.generated.h
 	$(ECHO) "MISC freezing bytecode"
 	$(Q)../tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
 
@@ -89,5 +106,7 @@ run:
 
 test: $(BUILD)/firmware.elf
 	$(Q)/bin/echo -e "print('hello world!', list(x+1 for x in range(10)), end='eol\\\\n')\\r\\n\\x04" | $(BUILD)/firmware.elf | tail -n2 | grep "^hello world! \\[1, 2, 3, 4, 5, 6, 7, 8, 9, 10\\]eol"
+
+
 
 include ../py/mkrules.mk
