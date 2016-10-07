@@ -158,6 +158,9 @@ mp_obj_t mp_obj_str_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
             if (MP_OBJ_IS_TYPE(args[0], &mp_type_bytes)) {
                 GET_STR_DATA_LEN(args[0], str_data, str_len);
                 GET_STR_HASH(args[0], str_hash);
+                if (str_hash == 0) {
+                    str_hash = qstr_compute_hash(str_data, str_len);
+                }
                 mp_obj_str_t *o = MP_OBJ_TO_PTR(mp_obj_new_str_of_type(type, NULL, str_len));
                 o->data = str_data;
                 o->hash = str_hash;
@@ -191,6 +194,9 @@ STATIC mp_obj_t bytes_make_new(const mp_obj_type_t *type_in, size_t n_args, size
         }
         GET_STR_DATA_LEN(args[0], str_data, str_len);
         GET_STR_HASH(args[0], str_hash);
+        if (str_hash == 0) {
+            str_hash = qstr_compute_hash(str_data, str_len);
+        }
         mp_obj_str_t *o = MP_OBJ_TO_PTR(mp_obj_new_str_of_type(&mp_type_bytes, NULL, str_len));
         o->data = str_data;
         o->hash = str_hash;
@@ -875,9 +881,14 @@ STATIC mp_obj_t arg_as_int(mp_obj_t arg) {
     return arg;
 }
 
+#if MICROPY_ERROR_REPORTING == MICROPY_ERROR_REPORTING_TERSE
 STATIC NORETURN void terse_str_format_value_error(void) {
     mp_raise_ValueError("bad format string");
 }
+#else
+// define to nothing to improve coverage
+#define terse_str_format_value_error()
+#endif
 
 STATIC vstr_t mp_obj_str_format_helper(const char *str, const char *top, int *arg_i, mp_uint_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
     vstr_t vstr;

@@ -157,7 +157,6 @@ endif
 
 LIB_SRC_C = $(addprefix lib/,\
 	$(LIB_SRC_C_EXTRA) \
-	utils/printf.c \
 	timeutils/timeutils.c \
 	)
 
@@ -183,7 +182,7 @@ ifneq ($(FROZEN_MPY_DIR),)
 # then invoke make with FROZEN_MPY_DIR=frozen (be sure to build from scratch).
 MPY_CROSS = ../mpy-cross/mpy-cross
 MPY_TOOL = ../tools/mpy-tool.py
-FROZEN_MPY_PY_FILES := $(shell find $(FROZEN_MPY_DIR)/ -type f -name '*.py')
+FROZEN_MPY_PY_FILES := $(shell find -L $(FROZEN_MPY_DIR) -type f -name '*.py')
 FROZEN_MPY_MPY_FILES := $(addprefix $(BUILD)/,$(FROZEN_MPY_PY_FILES:.py=.mpy))
 CFLAGS += -DMICROPY_QSTR_EXTRA_POOL=mp_qstr_frozen_const_pool
 CFLAGS += -DMICROPY_MODULE_FROZEN_MPY
@@ -263,10 +262,8 @@ freedos:
 	MICROPY_PY_JNI=0
 
 # build an interpreter for coverage testing and do the testing
-# btree module is disabled, because with extra warnings enabled,
-# building berkeleydb errors out
 coverage:
-	$(MAKE) COPT="-O0" MICROPY_PY_BTREE=0 CFLAGS_EXTRA='-DMP_CONFIGFILE="<mpconfigport_coverage.h>" -fprofile-arcs -ftest-coverage -Wdouble-promotion -Wformat -Wmissing-declarations -Wmissing-prototypes -Wold-style-definition -Wpointer-arith -Wshadow -Wsign-compare -Wuninitialized -Wunused-parameter -DMICROPY_UNIX_COVERAGE' LDFLAGS_EXTRA='-fprofile-arcs -ftest-coverage' BUILD=build-coverage PROG=micropython_coverage
+	$(MAKE) COPT="-O0" CFLAGS_EXTRA='-DMP_CONFIGFILE="<mpconfigport_coverage.h>" -fprofile-arcs -ftest-coverage -Wdouble-promotion -Wformat -Wmissing-declarations -Wmissing-prototypes -Wold-style-definition -Wpointer-arith -Wshadow -Wsign-compare -Wuninitialized -Wunused-parameter -DMICROPY_UNIX_COVERAGE' LDFLAGS_EXTRA='-fprofile-arcs -ftest-coverage' BUILD=build-coverage PROG=micropython_coverage
 
 coverage_test: coverage
 	$(eval DIRNAME=$(notdir $(CURDIR)))
